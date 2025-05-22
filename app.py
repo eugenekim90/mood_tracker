@@ -4,6 +4,7 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
 import os
 
 # Google Sheet ID
@@ -30,14 +31,34 @@ def init_gsheets():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     
-    # Check if credentials file exists
-    if not os.path.exists('credentials.json'):
-        st.error("credentials.json file not found!")
+    credentials = None
+
+    if os.path.exists('credentials.json'):
+        # Load credentials from local file if available
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+            'credentials.json', scope)
+    elif 'gcp_service_account' in st.secrets:
+        # Use credentials provided via Streamlit secrets on Streamlit Cloud
+        secret = st.secrets['gcp_service_account']
+        if isinstance(secret, str):
+            try:
+                secret = json.loads(secret)
+            except json.JSONDecodeError:
+                st.error("Invalid JSON in st.secrets['gcp_service_account']")
+                st.stop()
+        else:
+            # Convert secrets object to a plain dict if needed
+            secret = dict(secret)
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            secret, scope)
+    else:
+        st.error(
+            "Google service account credentials not found! "
+            "Provide credentials.json or set st.secrets['gcp_service_account']."
+        )
         st.stop()
-    
+
     # Connect to Google Sheets
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        'credentials.json', scope)
     client = gspread.authorize(credentials)
     
     try:
