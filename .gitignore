@@ -38,4 +38,7 @@ Thumbs.db
 # Google Sheets credentials
 credentials.json
 
+# Streamlit secrets
+.streamlit/
+
 

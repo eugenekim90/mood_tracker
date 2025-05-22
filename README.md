@@ -17,15 +17,12 @@ A simple tool for tracking and visualizing support ticket queue moods.
 
 2. **Google Sheet Setup**
    - Create a Google Sheet with columns: Timestamp, Mood, Note
-   - Set up Google API credentials
-   - Share sheet with the service account email
-   - Update `GOOGLE_SHEET_ID` in app.py
+   - Create a Google Cloud service account and download credentials.json
+   - Share your sheet with the service account email
+   - Place credentials.json in the root directory
+   - Update `GOOGLE_SHEET_ID` in app.py with your sheet ID
 
-3. **Credentials Setup**
-   - For local development: Save service account JSON as `credentials.json` (not tracked by git)
-   - For Streamlit deployment: Add credentials to Streamlit secrets (see Deployment section)
-
-4. **Run the App**
+3. **Run the App**
    ```bash
    streamlit run app.py
    ```
@@ -36,32 +33,14 @@ A simple tool for tracking and visualizing support ticket queue moods.
 - **Filtering**: Use date picker to view historical data
 
 ## Deployment
-Deploy to Streamlit Cloud by connecting your GitHub repo:
-
-1. Store credentials securely using Streamlit secrets:
-   - Go to your app's dashboard on Streamlit Cloud
-   - Navigate to App settings > Secrets
-   - Add your credentials in this format:
-     ```toml
-     [gcp_service_account]
-     type = "service_account"
-     project_id = "your-project-id"
-     private_key_id = "your-private-key-id"
-     private_key = "your-private-key"
-     client_email = "your-client-email"
-     client_id = "your-client-id"
-     auth_uri = "https://accounts.google.com/o/oauth2/auth"
-     token_uri = "https://oauth2.googleapis.com/token"
-     auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-     client_x509_cert_url = "your-cert-url"
-     ```
-
-2. NEVER commit credentials to your repository.
+For deployment, you'll need to:
+1. Make sure credentials.json is in .gitignore (it is by default)
+2. When deploying to Streamlit Cloud, upload credentials.json as a secure file
 
 The app is deployed at: https://eugenekim90-mood-tracker-app-auh1tk.streamlit.app/
 
 ## Project Files
 - `app.py`: Main application
 - `requirements.txt`: Dependencies
-- `credentials.json`: API credentials (not in repo)
+- `credentials.json`: Google API credentials (not in repo)
 
