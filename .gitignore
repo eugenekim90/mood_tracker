@@ -39,6 +39,6 @@ Thumbs.db
 credentials.json
 
 # Streamlit secrets
-.streamlit/
+.streamlit/secrets.toml
 
 
