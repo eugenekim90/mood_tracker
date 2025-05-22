@@ -31,29 +31,33 @@ def init_gsheets():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     
-    # First try to get credentials from Streamlit secrets as text
+    # First check if credentials.json exists locally
+    if os.path.exists('credentials.json'):
+        try:
+            credentials = ServiceAccountCredentials.from_json_keyfile_name(
+                'credentials.json', scope)
+            client = gspread.authorize(credentials)
+            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+            return sheet
+        except Exception as e:
+            st.error(f"Error with credentials.json: {str(e)}")
+    
+    # If no credentials.json or it failed, try Streamlit secrets
     try:
         if 'gcp_credentials' in st.secrets:
-            # Create a credentials.json file from the secret
             credentials_dict = json.loads(st.secrets['gcp_credentials'])
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(
                 credentials_dict, scope)
-        else:
-            # Check if credentials file exists locally
-            if not os.path.exists('credentials.json'):
-                st.error("credentials.json file not found!")
-                st.info("Please create credentials.json locally or add a 'gcp_credentials' secret in Streamlit Cloud.")
-                st.stop()
-            
-            credentials = ServiceAccountCredentials.from_json_keyfile_name(
-                'credentials.json', scope)
-        
-        client = gspread.authorize(credentials)
-        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
-        return sheet
+            client = gspread.authorize(credentials)
+            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+            return sheet
     except Exception as e:
-        st.error(f"Error accessing Google Sheet: {str(e)}")
-        st.stop()
+        st.error(f"Error with Streamlit secrets: {str(e)}")
+    
+    # If we get here, both methods failed
+    st.error("No valid credentials found!")
+    st.info("Please create credentials.json locally or add a 'gcp_credentials' secret in Streamlit Cloud.")
+    st.stop()
 
 # Initialize session state
 if 'sheet' not in st.session_state:
