@@ -38,7 +38,7 @@ Thumbs.db
 # Google Sheets credentials
 credentials.json
 
-# Streamlit secrets
-.streamlit/secrets.toml
+# Local Streamlit secrets (but not the template)
+# .streamlit/secrets.toml
 
 

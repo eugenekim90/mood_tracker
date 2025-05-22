@@ -31,20 +31,42 @@ def init_gsheets():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     
-    # Try local file first (simplest approach)
-    if os.path.exists('credentials.json'):
+    credentials = None
+    
+    # Try to get credentials from Streamlit secrets
+    if "gcp_service_account" in st.secrets:
+        try:
+            json_creds = st.secrets["gcp_service_account"]
+            creds_dict = json.loads(json_creds)
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                creds_dict, scope)
+        except Exception as e:
+            st.warning(f"Error with Streamlit secrets: {str(e)}")
+    
+    # If no credentials from secrets, try local file
+    if credentials is None and os.path.exists('credentials.json'):
         try:
             credentials = ServiceAccountCredentials.from_json_keyfile_name(
                 'credentials.json', scope)
-            client = gspread.authorize(credentials)
-            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
-            return sheet
         except Exception as e:
-            st.error(f"Error with credentials.json: {str(e)}")
+            st.warning(f"Error with credentials.json: {str(e)}")
     
-    # If we're here, the local file didn't work or doesn't exist
-    st.error("No valid credentials found. Please add credentials.json file.")
-    st.stop()
+    # If still no credentials, show error and stop
+    if credentials is None:
+        st.error("No valid credentials found!")
+        st.info("Please either:")
+        st.info("1. Add credentials.json file locally, or")
+        st.info("2. Add gcp_service_account to Streamlit secrets")
+        st.stop()
+    
+    # Use credentials to connect to Google Sheets
+    try:
+        client = gspread.authorize(credentials)
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+        return sheet
+    except Exception as e:
+        st.error(f"Error connecting to Google Sheet: {str(e)}")
+        st.stop()
 
 # Initialize session state
 if 'sheet' not in st.session_state:
