@@ -37,3 +37,4 @@ The Google Sheet should have the following columns:
 - `Mood` (Happy, Frustrated, Confused, Excited, Tired)
 - `Note` (optional)
 
+# Update 1
