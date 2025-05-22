@@ -4,6 +4,7 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import os
 import json
 
 # Google Sheet ID
@@ -30,30 +31,29 @@ def init_gsheets():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     
-    # Try to get credentials from Streamlit secrets
+    # First try to get credentials from Streamlit secrets as text
     try:
-        credentials_dict = st.secrets["gcp_service_account"]
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-            credentials_dict, scope)
-    except Exception:
-        # Fall back to file-based credentials (for local development)
-        try:
+        if 'gcp_credentials' in st.secrets:
+            # Create a credentials.json file from the secret
+            credentials_dict = json.loads(st.secrets['gcp_credentials'])
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                credentials_dict, scope)
+        else:
+            # Check if credentials file exists locally
+            if not os.path.exists('credentials.json'):
+                st.error("credentials.json file not found!")
+                st.info("Please create credentials.json locally or add a 'gcp_credentials' secret in Streamlit Cloud.")
+                st.stop()
+            
             credentials = ServiceAccountCredentials.from_json_keyfile_name(
                 'credentials.json', scope)
-        except Exception as e:
-            st.error(f"Error loading credentials: {str(e)}")
-            st.info("Make sure you have either credentials.json file locally or set up secrets in Streamlit Cloud.")
-            st.stop()
-    
-    client = gspread.authorize(credentials)
-    
-    try:
+        
+        client = gspread.authorize(credentials)
         sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+        return sheet
     except Exception as e:
         st.error(f"Error accessing Google Sheet: {str(e)}")
         st.stop()
-    
-    return sheet
 
 # Initialize session state
 if 'sheet' not in st.session_state:
