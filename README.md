@@ -19,10 +19,7 @@ A simple tool for tracking and visualizing support ticket queue moods.
    - Create a Google Sheet with columns: Timestamp, Mood, Note
    - Create a Google Cloud service account and download credentials.json
    - Share your sheet with the service account email
-   - Place credentials.json in the root directory **or** add its contents
-     to your Streamlit Cloud secrets as `gcp_service_account` (either as a
-     JSON string or a `[gcp_service_account]` table)
-   - Update `GOOGLE_SHEET_ID` in app.py with your sheet ID
+
 
 3. **Run the App**
    ```bash

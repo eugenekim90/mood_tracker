@@ -39,18 +39,7 @@ def init_gsheets():
             'credentials.json', scope)
     elif 'gcp_service_account' in st.secrets:
         # Use credentials provided via Streamlit secrets on Streamlit Cloud
-        secret = st.secrets['gcp_service_account']
-        if isinstance(secret, str):
-            try:
-                secret = json.loads(secret)
-            except json.JSONDecodeError:
-                st.error("Invalid JSON in st.secrets['gcp_service_account']")
-                st.stop()
-        else:
-            # Convert secrets object to a plain dict if needed
-            secret = dict(secret)
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-            secret, scope)
+
     else:
         st.error(
             "Google service account credentials not found! "
