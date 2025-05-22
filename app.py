@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
+import json
 
 # Google Sheet ID
 GOOGLE_SHEET_ID = "1XxX5ScIUJvv7m4q9fW7iuH3N_P0TExUPha9hMNZxSqA"
@@ -27,24 +28,23 @@ st.set_page_config(
 
 # Initialize Google Sheets connection
 def init_gsheets():
-    # Check if credentials file exists
-    if not os.path.exists('credentials.json'):
-        st.error("Missing credentials.json file")
-        st.stop()
-    
-    # Connect to Google Sheets
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        'credentials.json', scope)
-    client = gspread.authorize(credentials)
     
-    try:
-        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
-        return sheet
-    except Exception as e:
-        st.error(f"Error accessing Google Sheet: {str(e)}")
-        st.stop()
+    # Try local file first (simplest approach)
+    if os.path.exists('credentials.json'):
+        try:
+            credentials = ServiceAccountCredentials.from_json_keyfile_name(
+                'credentials.json', scope)
+            client = gspread.authorize(credentials)
+            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+            return sheet
+        except Exception as e:
+            st.error(f"Error with credentials.json: {str(e)}")
+    
+    # If we're here, the local file didn't work or doesn't exist
+    st.error("No valid credentials found. Please add credentials.json file.")
+    st.stop()
 
 # Initialize session state
 if 'sheet' not in st.session_state:
