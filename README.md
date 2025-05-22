@@ -30,12 +30,15 @@ A simple Streamlit app for tracking the emotional state of support queues.
    streamlit run app.py
    ```
 
-## Data Structure
+## Usage
 
-The Google Sheet should have the following columns:
-- `Timestamp` (YYYY-MM-DD HH:MM:SS)
-- `Mood` (Happy, Frustrated, Confused, Excited, Tired)
-- `Note` (optional)
+1. **Log Moods**: Select an emoji that represents the current queue feeling and add an optional note
+2. **View Recent Entries**: See the 10 most recent mood entries directly in the left sidebar
+3. **Analyze Trends**: 
+   - Select a date from the dropdown to view mood distribution for that day
+   - See the most common mood for both the selected date and its containing week
+   - Visualize distribution with the color-coded bar chart
+4. **Filter Data**: Use the date selector to view historical data and track mood patterns over time
 
-# Update 1
-# Update 2
+
+
