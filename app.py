@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
-import json
 
 # Google Sheet ID
 GOOGLE_SHEET_ID = "1XxX5ScIUJvv7m4q9fW7iuH3N_P0TExUPha9hMNZxSqA"
@@ -28,44 +27,28 @@ st.set_page_config(
 
 # Initialize Google Sheets connection
 def init_gsheets():
+    # Check if credentials file exists
+    if not os.path.exists('credentials.json'):
+        st.error("Missing credentials.json file")
+        st.stop()
+    
+    # Connect to Google Sheets
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        'credentials.json', scope)
+    client = gspread.authorize(credentials)
     
-    # First check if credentials.json exists locally
-    if os.path.exists('credentials.json'):
-        try:
-            credentials = ServiceAccountCredentials.from_json_keyfile_name(
-                'credentials.json', scope)
-            client = gspread.authorize(credentials)
-            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
-            return sheet
-        except Exception as e:
-            st.error(f"Error with credentials.json: {str(e)}")
-    
-    # If no credentials.json or it failed, try Streamlit secrets
     try:
-        if 'gcp_credentials' in st.secrets:
-            credentials_dict = json.loads(st.secrets['gcp_credentials'])
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-                credentials_dict, scope)
-            client = gspread.authorize(credentials)
-            sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
-            return sheet
+        sheet = client.open_by_key(GOOGLE_SHEET_ID).sheet1
+        return sheet
     except Exception as e:
-        st.error(f"Error with Streamlit secrets: {str(e)}")
-    
-    # If we get here, both methods failed
-    st.error("No valid credentials found!")
-    st.info("Please create credentials.json locally or add a 'gcp_credentials' secret in Streamlit Cloud.")
-    st.stop()
+        st.error(f"Error accessing Google Sheet: {str(e)}")
+        st.stop()
 
 # Initialize session state
 if 'sheet' not in st.session_state:
-    try:
-        st.session_state.sheet = init_gsheets()
-    except Exception as e:
-        st.error(f"Error connecting to Google Sheets: {str(e)}")
-        st.stop()
+    st.session_state.sheet = init_gsheets()
 
 # Sidebar for mood input
 st.sidebar.title("Log a Mood")

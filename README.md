@@ -32,24 +32,6 @@ A simple tool for tracking and visualizing support ticket queue moods.
 - **Viewing**: Charts show distribution by day with weekly summaries
 - **Filtering**: Use date picker to view historical data
 
-## Deployment
-For deployment to Streamlit Cloud:
-
-1. In Streamlit Cloud, go to your app settings → Secrets
-2. Add a new secret called `gcp_credentials`
-3. Copy and paste the **entire JSON content** from your credentials.json file:
-   ```
-   {
-     "type": "service_account",
-     "project_id": "your-project-id",
-     "private_key_id": "your-private-key-id",
-     "private_key": "your-private-key",
-     ...rest of your credentials file...
-   }
-   ```
-4. The app will automatically use these credentials when deployed
-
-The app is deployed at: https://eugenekim90-mood-tracker-app-auh1tk.streamlit.app/
 
 ## Project Files
 - `app.py`: Main application
