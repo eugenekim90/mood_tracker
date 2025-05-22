@@ -30,14 +30,24 @@ def init_gsheets():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
     
-    # Check if credentials file exists
-    if not os.path.exists('credentials.json'):
-        st.error("credentials.json file not found!")
+    credentials = None
+
+    if os.path.exists('credentials.json'):
+        # Load credentials from local file if available
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+            'credentials.json', scope)
+    elif 'gcp_service_account' in st.secrets:
+        # Use credentials provided via Streamlit secrets on Streamlit Cloud
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            st.secrets['gcp_service_account'], scope)
+    else:
+        st.error(
+            "Google service account credentials not found! "
+            "Provide credentials.json or set st.secrets['gcp_service_account']."
+        )
         st.stop()
-    
+
     # Connect to Google Sheets
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        'credentials.json', scope)
     client = gspread.authorize(credentials)
     
     try:
